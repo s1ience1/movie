@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dayuanit.movie.movie1.mapper.FilmScheduleMapper">
+  <resultMap id="BaseResultMap" type="com.dayuanit.movie.movie1.entity.FilmSchedule">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="film_code" jdbcType="VARCHAR" property="filmCode" />
+    <result column="cineam_code" jdbcType="VARCHAR" property="cineamCode" />
+    <result column="show_time" jdbcType="VARCHAR" property="showTime" />
+    <result column="language" jdbcType="VARCHAR" property="language" />
+    <result column="hall" jdbcType="VARCHAR" property="hall" />
+    <result column="price" jdbcType="VARCHAR" property="price" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, film_code, cineam_code, show_time, language, hall, price
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from cinema_film_schedule
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from cinema_film_schedule
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.dayuanit.movie.movie1.entity.FilmSchedule">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into cinema_film_schedule (film_code, cineam_code, show_time, 
+      language, hall, price
+      )
+    values (#{filmCode,jdbcType=VARCHAR}, #{cineamCode,jdbcType=VARCHAR}, #{showTime,jdbcType=VARCHAR}, 
+      #{language,jdbcType=VARCHAR}, #{hall,jdbcType=VARCHAR}, #{price,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.dayuanit.movie.movie1.entity.FilmSchedule">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into cinema_film_schedule
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="filmCode != null">
+        film_code,
+      </if>
+      <if test="cineamCode != null">
+        cineam_code,
+      </if>
+      <if test="showTime != null">
+        show_time,
+      </if>
+      <if test="language != null">
+        language,
+      </if>
+      <if test="hall != null">
+        hall,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="filmCode != null">
+        #{filmCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cineamCode != null">
+        #{cineamCode,jdbcType=VARCHAR},
+      </if>
+      <if test="showTime != null">
+        #{showTime,jdbcType=VARCHAR},
+      </if>
+      <if test="language != null">
+        #{language,jdbcType=VARCHAR},
+      </if>
+      <if test="hall != null">
+        #{hall,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.dayuanit.movie.movie1.entity.FilmSchedule">
+    update cinema_film_schedule
+    <set>
+      <if test="filmCode != null">
+        film_code = #{filmCode,jdbcType=VARCHAR},
+      </if>
+      <if test="cineamCode != null">
+        cineam_code = #{cineamCode,jdbcType=VARCHAR},
+      </if>
+      <if test="showTime != null">
+        show_time = #{showTime,jdbcType=VARCHAR},
+      </if>
+      <if test="language != null">
+        language = #{language,jdbcType=VARCHAR},
+      </if>
+      <if test="hall != null">
+        hall = #{hall,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.dayuanit.movie.movie1.entity.FilmSchedule">
+    update cinema_film_schedule
+    set film_code = #{filmCode,jdbcType=VARCHAR},
+      cineam_code = #{cineamCode,jdbcType=VARCHAR},
+      show_time = #{showTime,jdbcType=VARCHAR},
+      language = #{language,jdbcType=VARCHAR},
+      hall = #{hall,jdbcType=VARCHAR},
+      price = #{price,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="listScedule" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"></include>
+    from cinema_film_schedule
+    where film_code = #{filmCode} and cineam_code = #{cinemaCode}
+  </select>
+
+
+  <select id="getFilmSchedule" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"></include>
+    from cinema_film_schedule
+    where film_code = #{filmCode} and cineam_code = #{cinemaCode}  and show_time = #{showTime}
+  </select>
+</mapper>

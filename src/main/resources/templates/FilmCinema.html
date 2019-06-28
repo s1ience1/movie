@@ -1,0 +1,193 @@
+
+<html lang="en">
+<head>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--引入vue-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <el-row>
+            <el-col :span="4">
+                <div class="grid-content ">
+                    <img :src="'/pic/'+filmInfo.filmPic">
+                </div>
+            </el-col>
+
+
+            <el-col :span="4">
+                <div class="grid-content">
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmName}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmType}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmTime}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmShowTime}}</div></el-col>
+                </div>
+            </el-col>
+        </el-row>
+
+        <!--分割线-->
+        <el-divider></el-divider>
+
+        <div>
+            <el-tag>行政区</el-tag>
+
+            <el-row>
+                <el-col :span="1">
+                    <div class="grid-content" >
+                        <el-link @click="areaCineam(-1)">全部</el-link>
+                    </div>
+                </el-col>
+
+                <el-col :span="2" v-for="area in areas">
+                    <div class="grid-content" >
+                        <el-link @click="areaCineam(area.areaId)">{{area.areaName}}</el-link>
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+
+
+        <!--分割线-->
+        <el-divider></el-divider>
+        <div>
+            <el-tag>影院列表</el-tag>
+            <el-row v-for="c in cinema">
+                <el-col :span="18">
+                    <div class="grid-content">
+
+                        <div>
+                            <span>{{c.cinemaName}}</span><br>
+                            <span style="color: #909399;font-size: 12px">{{c.cinemaAddress}}</span>
+
+                        </div><br>
+
+                        <el-divider>
+                        </el-divider>
+                    </div>
+                </el-col>
+
+                <el-col :span="2">
+                    <div class="grid-content">
+                        <span>￥0.01元起</span>
+                    </div>
+                </el-col>
+
+                <el-col :span="4">
+                    <div class="grid-content">
+                       <el-button type="danger" round @click="toCinema(c.id)">选座购票</el-button>
+                    </div>
+                </el-col>
+
+            </el-row>
+            <!--分割线-->
+
+        </div>
+
+
+    </div>
+</body>
+
+    <script>
+        new Vue({
+            //挂载点
+            el : '#app',
+            data : {
+                filmInfo :{},
+                filmId : [[${filmId}]],
+                filmCode : [[${filmCode}]],
+                areas : [],
+                cinema : [],
+                areaId : -1,
+            },
+            created : function () {
+                //this 代表当前vue对象
+                this.loadFilmInfo()
+                this.loadArea()
+                this.loadCinema()
+            },
+
+            methods : {
+                loadFilmInfo : function () {
+                    var that = this;
+                    //axios  ajax请求
+                    //取到filmid 根据电影的id查询电影
+                    axios.get('/film/'+that.filmId)
+                        .then(function (response) {
+                            that.filmInfo = response.data.data;
+                        })
+                },
+
+
+                loadArea : function () {
+                    //查询所有的地区
+                    var that = this
+                    axios.get('/area')
+                        .then(function (response) {
+                            that.areas = response.data.data;
+                        })
+                },
+
+
+                //查询该电影所有的影院 根据cinemaCode查询
+                loadCinema : function () {
+                        //查询该电影所在的所有电影院  areaId=-1 代表所有
+                        var that = this
+                        axios.get('/filmCinema/'+that.filmCode+'/'+that.areaId)
+                            .then(function (response) {
+                                that.cinema = response.data.data;
+                            })
+                    },
+
+                areaCineam : function (areaId) {
+                    this.areaId = areaId
+                    this.loadCinema();
+                },
+
+
+                toCinema : function (cimemaId) {
+                    window.location.href = '/film/toCinema/'+ cimemaId+'/'+this.filmId
+                }
+            },
+
+
+        })
+    </script>
+</html>

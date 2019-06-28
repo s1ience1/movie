@@ -1,0 +1,206 @@
+
+<html lang="en">
+<head>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--引入vue-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+
+        <el-row>
+            <el-col :span="8">
+                <div class="grid-content">
+                    <el-row>
+                        <el-col :span="12">
+                            <div class="grid-content">
+                            <img :src="'/pic/'+film.filmPic">
+                            </div>
+                        </el-col>
+
+
+                        <el-col :span="12">
+                            <div class="grid-content">
+                                <el-row>
+                                    <el-col :span="24"><div class="grid-content" style="font-size: xx-large">{{film.filmName}}</div></el-col>
+                                </el-row>
+
+                                <el-row>
+                                    <el-col :span="24"><div class="grid-content">类型：{{film.filmType}}</div></el-col>
+                                </el-row>
+
+                                <el-row>
+                                    <el-col :span="24"><div class="grid-content">时长：{{film.filmTime}}</div></el-col>
+                                </el-row>
+                            </div>
+                        </el-col>
+                    </el-row>
+
+
+                    <div>
+                        <el-row>
+                            <el-col :span="6"><div class="grid-content">影院：</div></el-col>
+                            <el-col :span="18"><div class="grid-content">{{cinema.cinemaName}}</div></el-col>
+                        </el-row>
+
+                        <el-row>
+                            <el-col :span="6"><div class="grid-content">影厅：</div></el-col>
+                            <el-col :span="18"><div class="grid-content">{{schedule.hall}}</div></el-col>
+                        </el-row>
+
+                        <el-row>
+                            <el-col :span="6"><div class="grid-content">版本：</div></el-col>
+                            <el-col :span="18"><div class="grid-content">{{schedule.language}}</div></el-col>
+                        </el-row>
+
+                        <el-row>
+                            <el-col :span="6"><div class="grid-content">场次：</div></el-col>
+                            <el-col :span="18"><div class="grid-content">{{schedule.showTime}}</div></el-col>
+                        </el-row>
+
+                        <el-row>
+                            <el-col :span="6"><div class="grid-content">票价：</div></el-col>
+                            <el-col :span="18"><div class="grid-content">￥{{schedule.price}}/张</div></el-col>
+                        </el-row>
+                    </div>
+                    <!--分割线-->
+                    <el-divider></el-divider>
+
+                    <el-row>
+                        <el-col :span="4">
+                            <div class="grid-content">座位</div>
+                        </el-col>
+                        <el-col :span="20">
+                            <div class="grid-content">
+                                <el-tag
+                                        v-for="seat in seatArray">
+                                    {{seat.split('-')[0] + '排' + seat.split('-')[1] + '座'}}
+                                </el-tag>
+                            </div>
+                        </el-col>
+                    </el-row>
+
+                    <el-row>
+                        <el-col :span="4"><div class="grid-content">总价：</div></el-col>
+                        <el-col :span="20"><div class="grid-content">￥{{(schedule.price * seatArray.length).toFixed(2)}}</div></el-col>
+                    </el-row>
+
+
+                    <el-row>
+                        <el-col :span="24">
+                            <div class="grid-content">
+                                <el-button type="danger">
+                                    支付成功
+                                </el-button>
+                             </div>
+                        </el-col>
+                    </el-row>
+
+                </div>
+            </el-col>
+        </el-row>
+
+    </div>
+</body>
+
+
+
+
+    <script>
+        new Vue({
+            el : '#app',
+            data : {
+                film :{},
+                cinema : {},
+                // 时间表
+                schedule : {},
+                filmId:[[${filmId}]],
+                cinemaId:[[${cinemaId}]],
+                scheduleId : [[${scheduleId}]],
+                seatInfo : '[[${seatInfo}]]',
+
+            },
+            created : function () {
+                this.loadFilm()
+                this.loadCinema()
+                this.loadScheduel()
+            },
+
+            computed : {
+                seatArray : function () {
+                    return this.seatInfo.split(",")
+                }
+            },
+
+
+            // 查询该电影的信息
+            methods : {
+                loadFilm : function () {
+                    var that = this;
+                    axios.get('/film/'+that.filmId)
+                        .then(function (response) {
+                            that.film = response.data.data;
+                        })
+                },
+
+                //查询影院信息
+                loadCinema : function () {
+
+                    var that = this;
+                    axios.get('/cinema/'+this.cinemaId)
+                        .then(function (response) {
+                            that.cinema = response.data.data;
+                        })
+                },
+
+                //查询 该应选 该电影 该时段的排表
+                loadScheduel : function () {
+                    var that = this;
+                    axios.get('/schedule/'+this.scheduleId).then(function (response) {
+                        that.schedule = response.data.data;
+                    })
+                },
+
+                },
+        })
+    </script>
+</html>

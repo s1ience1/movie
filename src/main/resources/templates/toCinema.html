@@ -1,0 +1,226 @@
+
+<html lang="en">
+<head>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--引入vue-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <el-row>
+            <el-col :span="6">
+                <div class="grid-content ">
+                    <img :src="cinemaInfo.picName">
+                </div>
+            </el-col>
+
+
+            <el-col :span="18">
+                <div class="grid-content">
+                    <el-col :span="24"><div class="grid-content">{{cinemaInfo.cinemaName}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{cinemaInfo.cinemaAddress}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">电话：{{cinemaInfo.cinemaTelno}}</div></el-col>
+                </div>
+            </el-col>
+        </el-row>
+
+        <!--分割线-->
+        <el-divider></el-divider>
+
+        <!-- 查询该电影院所有的电影  展示电影图片-->
+
+        <div style="width: 322px">
+            <template>
+                <el-carousel :interval="4000" type="card" height="200px"
+                             :autoplay="false" :loop="false" :initial-index="curentFilmIndex" @change="filmChangeHandler">
+                    <el-carousel-item v-for="film in films">
+
+                        <el-card :body-style="{ padding: '10px' }">
+                            <img :src="'/pic/'+film.filmPic" class="image">
+                        </el-card>
+                    </el-carousel-item>
+                </el-carousel>
+            </template>
+        </div>
+
+        <el-row>
+            <el-col :span="24">
+                <div class="grid-content">
+                    {{currentFilm.filmName}}
+                </div>
+            </el-col>
+        </el-row>
+
+
+        <el-row>
+            <el-col :span="12"><div class="grid-content">{{currentFilm.filmTime}}</div></el-col>
+            <el-col :span="12"><div class="grid-content">{{currentFilm.filmType}}</div></el-col>
+        </el-row>
+
+        <!--分割线-->
+        <el-divider></el-divider>
+
+        <!--查询该影院 某部电影的时间表-->
+        <div>
+            <template>
+                <el-table
+                        :data="timeTable"
+                        style="width: 100%">
+                    <el-table-column
+                            label="放映时间"
+                            width="180">
+                        <template slot-scope="scope">
+                            <span style="margin-left: 10px">{{ scope.row.showTime }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="语言版本"
+                            width="180">
+                        <template slot-scope="scope">
+                            <span style="margin-left: 10px">{{ scope.row.language }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="放映厅"
+                            width="180">
+                        <template slot-scope="scope">
+                            <span style="margin-left: 10px">{{ scope.row.hall }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column
+                            label="售价(元)"
+                            width="180">
+                        <template slot-scope="scope">
+                            <span style="margin-left: 10px">￥{{ scope.row.price }}</span>
+                        </template>
+                    </el-table-column>
+                    <el-table-column label="选座购票">
+                        <template slot-scope="scope">
+                            <el-button
+                                    size="mini"
+                                    @click="chooseSeat(scope.row.id)">选座购票</el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </template>
+
+        </div>
+    </div>
+</body>
+
+    <script>
+        new Vue({
+            //挂载点
+            el : '#app',
+            data : {
+                cinemaInfo :{},
+                films : [],
+                timeTable :[],
+                cinemaId : [[${cinemaId}]],
+                filmId : [[${filmId}]],
+                currentFilm : {},
+            },
+
+            computed : {
+                curentFilmIndex : function () {
+                    //我选择的电影  到底是电影列表里的哪一部
+                    for (var i = 0; i < this.films.length; i ++ ) {
+                        if (this.filmId == this.films[i].id ) {
+                            this.currentFilm = this.films[i];
+                            return i;
+                        }
+                    }
+                }
+            },
+
+            created : function () {
+                //this 代表当前vue对象
+                this.loadCinemaInfo()
+                this.loadScheduel(this.filmId,this.cinemaId)
+                this.listCinemaFilms()
+
+            },
+
+            methods : {
+                //
+                filmChangeHandler : function(x,y) {
+                  this.currentFilm = this.films[x];
+                  this.loadScheduel(this.currentFilm.id,this.cinemaId)
+                },
+
+
+                loadCinemaInfo : function () {
+                    var that = this;
+                    axios.get('/cinema/'+that.cinemaId)
+                        .then(function (response) {
+                            that.cinemaInfo = response.data.data;
+                        })
+                },
+
+                //该电影院 所有电影的  时间表
+                loadScheduel : function (filmId,cinemaId) {
+
+                    var that = this
+                    axios.get('/cinemaSchedule/'+filmId+'/'+cinemaId)
+                        .then(function (response) {
+                            that.timeTable = response.data.data;
+                        })
+                },
+
+
+
+                listCinemaFilms : function () {
+                    var that = this
+                    axios.get('/cinema/listFilm/'+that.cinemaId)
+                        .then(function (response) {
+                            that.films = response.data.data;
+                        })
+            },
+
+                chooseSeat : function (scheduleId) {
+                    window.location.href = '/toChooseSeat/'+this.filmId+'/'+this.cinemaId+'/'+scheduleId
+                }
+            },
+
+
+        })
+    </script>
+</html>

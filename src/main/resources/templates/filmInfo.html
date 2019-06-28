@@ -1,0 +1,160 @@
+
+<html lang="en">
+<head>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--引入vue-->
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <!-- import JavaScript -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <style>
+        .el-row {
+            margin-bottom: 20px;
+        &:last-child {
+             margin-bottom: 0;
+         }
+        }
+        .el-col {
+            border-radius: 4px;
+        }
+        .bg-purple-dark {
+            background: #99a9bf;
+        }
+        .bg-purple {
+            background: #d3dce6;
+        }
+        .bg-purple-light {
+            background: #e5e9f2;
+        }
+        .grid-content {
+            border-radius: 4px;
+            min-height: 36px;
+        }
+        .row-bg {
+            padding: 10px 0;
+            background-color: #f9fafc;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <el-row>
+            <el-col :span="4">
+                <div class="grid-content ">
+                    <img :src="'/pic/'+filmInfo.filmPic">
+                </div>
+            </el-col>
+
+
+            <el-col :span="4">
+                <div class="grid-content">
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmName}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmType}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmTime}}</div></el-col>
+                    <el-col :span="24"><div class="grid-content">{{filmInfo.filmShowTime}}</div></el-col>
+
+                    <el-col :span="24">
+                        <div class="grid-content">
+                            <el-row>
+                                <el-button type="primary" @click="buyTicket">特惠购票</el-button>
+                            </el-row>
+                        </div>
+                    </el-col>
+                </div>
+            </el-col>
+        </el-row>
+
+        <!--分割线-->
+        <el-divider></el-divider>
+
+        <div>
+            <el-tag>剧情简介</el-tag>
+            <el-card class="box-card">
+                {{filmInfo.filmPlot}}
+            </el-card>
+        </div>
+
+        <!--分割线-->
+        <el-divider></el-divider>
+        <div>
+            <el-tag>导演</el-tag>
+            <el-row>
+                <el-col :span="6" v-for="d in actors.direct">
+                    <div class="grid-content">
+                        <img :src="'/pic/'+d.actorPic"><br>
+                    {{d.actorName}}
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+
+        <div>
+            <el-tag>演员</el-tag>
+            <el-row>
+                <el-col :span="6" v-for="a in actors.actor">
+                    <div class="grid-content">
+                        <img :src="'/pic2/'+a.actorPic"><br>
+                    {{a.actorName}}
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+
+
+
+    </div>
+</body>
+
+    <script>
+        new Vue({
+            //挂载点
+            el : '#app',
+            data : {
+                //{}是对象
+                filmInfo :{},
+                //取到 上个页面点击电影的filmId和filmCode
+                filmId : [[${filmId}]],
+                filmCode : [[${filmCode}]],
+                actors : [],
+            },
+            created : function () {
+                //this 代表当前vue对象
+                this.loadFilmInfo()
+                this.loadActors()
+            },
+
+            methods : {
+                loadFilmInfo : function () {
+                    var that = this;
+                    //axios  ajax请求
+                    //取到filmid 查询指定的电影
+                    axios.get('/film/'+that.filmId)
+                        .then(function (response) {
+                            //response.data取到的是json串
+                            that.filmInfo = response.data.data;
+                        })
+                },
+
+                loadActors : function () {
+                    var that = this;
+                    //axios  ajax请求
+                    axios.get('/film/actor/'+that.filmCode)
+                        .then(function (response) {
+                            that.actors = response.data.data;
+                        })
+                },
+
+                buyTicket : function () {
+                    window.location.href = '/film/toBuyTicket/'+this.filmId+'/'+this.filmCode
+                },
+            },
+        })
+    </script>
+</html>
